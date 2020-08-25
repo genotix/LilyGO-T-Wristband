@@ -45,7 +45,10 @@ void sleepIMU() {
   imu.initAccel();
   imu.initGyro();
 
-  imu.sleepGyro(true);                // This should put the Gyroscope in SLEEP mode
+  // Eric: 25/08-2020
+  // I'm doubtful wether sleep mode actually does what it should do.
+  // Power consumption doesn't seem to be lower; disabling for now!
+  //imu.sleepGyro(true);                // This should put the Gyroscope in SLEEP mode
   
   sleepStateIMU                       = true;
 }
@@ -93,8 +96,11 @@ uint16_t initIMU()
           Serial.println("IMU countacted; putting it into low-power immediately.");
         #endif
 
+        
         // Bring it to sleepstate default
+        delay(100);
         sleepIMU();
+        delay(100);
         return true;
     } else {
       #ifdef ENABLE_SERIAL    
