@@ -12,10 +12,42 @@ void sleepIMU() {
     Serial.println("Sleeping IMU!");
     Serial.flush();
   #endif
+  
+  imu.settings.gyro.lowPowerEnable    = true;
+  imu.settings.gyro.enableX           = false;
+  imu.settings.gyro.enableY           = false;
+  imu.settings.gyro.enableZ           = false;
+  imu.settings.gyro.enabled           = false;
+  
+  imu.settings.mag.enabled            = false;
+  imu.settings.mag.lowPowerEnable     = true;
+  imu.settings.mag.operatingMode      = 11;
+  
+  imu.settings.accel.highResBandwidth = false;
+  imu.settings.accel.enabled          = false;
+  imu.settings.accel.enableX          = false;
+  imu.settings.accel.enableY          = false;
+  imu.settings.accel.enableZ          = false;
+  
+  imu.settings.temp.enabled           = false;
 
-  sleepStateIMU = true;
+  /*
+  You need to know use the following functions.
+  These three methods are all set as protection members in the original SparkFun_LSM9DS1_Arduino_Library.
+  Edit the SparkFunLSM9DS1.h file and move the declarations of initMag(), initAccel() and initGyro() to 
+  the public declaration for the LOW POWER of the IMU to work properly.
+  
+  !!! LSM9DS1 consumes about 1 mA in low power mode but that is ONLY when you initialize it!!!
+  */
+  delay(100);
+  
+  imu.initMag();
+  imu.initAccel();
+  imu.initGyro();
 
-  imu.sleepGyro(true);          // Issue sleep request
+  imu.sleepGyro(true);                // This should put the Gyroscope in SLEEP mode
+  
+  sleepStateIMU                       = true;
 }
 
 String getTemperature() {
@@ -30,24 +62,6 @@ void configureIMU() {
     imu.settings.accel.scale            = 2;      // Set accelerometer scale to +/-2g
     imu.settings.mag.scale              = 4;      // Set magnetometer scale to +/- 4g
     imu.settings.mag.sampleRate         = 0;      // Set magnetometer sample rate to 0.625 Hz
-
-    imu.settings.gyro.lowPowerEnable    = true;
-    imu.settings.gyro.enableX           = false;
-    imu.settings.gyro.enableY           = false;
-    imu.settings.gyro.enableZ           = false;
-    imu.settings.gyro.enabled           = false;
-    
-    imu.settings.mag.enabled            = false;
-    imu.settings.mag.lowPowerEnable     = true;
-    imu.settings.mag.operatingMode      = 11;
-    
-    imu.settings.accel.highResBandwidth = false;
-    imu.settings.accel.enabled          = false;
-    imu.settings.accel.enableX          = false;
-    imu.settings.accel.enableY          = false;
-    imu.settings.accel.enableZ          = false;
-    
-    imu.settings.temp.enabled           = false;
 }
 
 
@@ -78,20 +92,9 @@ uint16_t initIMU()
         #ifdef ENABLE_SERIAL    
           Serial.println("IMU countacted; putting it into low-power immediately.");
         #endif
-        
-        /*
-        You need to know using the following functions.
-        These three methods are all set as protection members in the original SparkFun_LSM9DS1_Arduino_Library.
-        If you need to use them, you need to put the three methods into public members.
-        This is just for faster sensor testing. Low current consumption
-        !!! LSM9DS1 consumes about 1 mA in low power mode but that is ONLY when you initialize it!!!
-        */
-        
-        imu.initMag();
-        imu.initAccel();
-        imu.initGyro();
 
-        sleepIMU();       // Is this working??
+        // Bring it to sleepstate default
+        sleepIMU();
         return true;
     } else {
       #ifdef ENABLE_SERIAL    
